@@ -13,16 +13,14 @@ Implicit `null` values are simply keys that are not set in the document.
 Just omit the key that should e considered `null`.
 #### Example
 ```
-PUT my-null-index/_doc/1
+PUT my-null-index/_doc/3
+{
+}
+
+PUT my-null-index/_doc/4
 {
   "status_code": "123"
 }
-
-
-PUT my-null-index/_doc/2
-{
-}
-
 ```
 
 ### Querying
@@ -41,6 +39,8 @@ GET my-null-index/_search
   }
 }
 ```
+This will return record `3` from the example above.
+
 ## Explicit `null` values
 
 
