@@ -9,6 +9,9 @@ Possible characteristics:
 - Uniqueness may need to be ensured outside of elastic or not
 - The approach may involve only Elasicsearch queries or additional tools (e.g. Logstash, Python, etc.)
 
+Note: Read [this post](https://www.elastic.co/blog/efficient-duplicate-prevention-for-event-based-data-in-elasticsearch) before attempting to overwrite the native elasticsearch `_id` field. Specifically: 
+
+> When Elasticsearch is allowed to assign the document identifier at indexing time, it can perform optimizations as it knows the generated identifier can not already exist in the index. This improves indexing performance. For identifiers generated externally and passed in with the document, Elasticsearch must treat this as a potential update and check whether the document identifier already exists in existing index segments, which requires additional work and therefore is slower. 
 
 ## Update query 
 
