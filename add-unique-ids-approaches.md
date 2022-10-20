@@ -5,17 +5,18 @@ I'm looking for ways to auto generate unique IDs in elasticsearch indices. There
 Possible characteristics:
 
 - IDs may be numeric or not
+- They may be ordered somehow or not
 - Uniqueness may need to be ensured outside of elastic or not
-- The approach may involve only Elasicsearch or additional tools (e.g. Logstash, Python, etc.)
+- The approach may involve only Elasicsearch queries or additional tools (e.g. Logstash, Python, etc.)
 
 
 ## Update query 
 
-The update approach always means that 
+The update approach always means that the id generation needs to be performed in a _separate_ step, i.e. not on indexing of a document. This can be done e.g. using `_reindex` or `_update_by_query`.
+
+### Example using `script` query that copies elaticsearch `_id` field
 
 This approach updates the `_source` with a new field built based on the auto-generated index field. It takes this `_id` and adds a new `id` field in the source with identical value (if it does not exist yet).
-
-### Example using `script` query
 ```
 POST  my-id-field-test-index/_update_by_query?conflicts=proceed
 {
@@ -34,8 +35,36 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
   }
 }
 ```
-## Example data
+This approach does not work on indexing, since the internal `_id` field is only generated _at the very end_ of indexing and cannot be used in ingestion pipelines.
 
+### Example using `script` query that generates id using `java.util.UUID.randomUUID()`
+
+This approach updates the `_source` with a new field built based on UUID generation. It adds a new `uuid` field in the source with a
+generated uuid.
+
+```
+POST  my-id-field-test-index/_update_by_query?conflicts=proceed
+{
+"script" : {
+    "source": "ctx._source.uuid = java.util.UUID.randomUUID().toString()",
+    "lang" : "painless"
+  },
+  "query": {
+    "bool": {
+      "must_not": {
+        "exists": {
+          "field": "uuid"
+        }
+      }
+    }
+  }
+}
+```
+## ID generation in ingestion pipelines
+
+...
+
+## Example data
 
 ```
 POST my-id-field-test-index/_bulk
