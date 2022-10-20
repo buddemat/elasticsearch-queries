@@ -63,10 +63,72 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
 
 This approach can (slightly modified) also be used in ingestion pipelines, see below.
 
-## ID generation in ingestion pipelines
+## ID generation in ingest pipelines
 ID generation while ingestion has the charm that it does not require an additional step. However, it limits the available approaches to what can be done with means available in elasticsearch queries.
 
+### Example using a painless `script` that generates ids using `java.util.UUID.randomUUID()`
+The following approach defines a pipeline that uses a similar script as above to generate a `uuid` field and attach it to incoming documents.
 
+#### Simulate pipeline
+
+```
+POST _ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "processors": [
+      {
+        "script": {
+          "description": "Generate UUID and store in 'uuid' field.",
+          "lang": "painless",
+          "source": """
+            ctx['uuid'] = java.util.UUID.randomUUID().toString()
+          """,
+          "params": {
+            "delimiter": "-",
+            "position": 1
+          }
+        }
+      }
+    ]
+  },
+  "docs": [
+    {
+      "_source": {
+        "fruit": "banana",
+        "amount": 10
+      }
+    }
+  ]
+}
+```
+#### Actually create pipeline and post data using it
+```
+PUT _ingest/pipeline/my-pipeline
+{
+  "description": "Generate UUID.",
+  "processors": [
+      {
+        "script": {
+          "description": "Generate UUID and store in 'uuid' field.",
+          "lang": "painless",
+          "source": """
+            ctx['uuid'] = java.util.UUID.randomUUID().toString()
+          """,
+          "params": {
+            "delimiter": "-",
+            "position": 1
+          }
+        }
+      }
+    ]
+}
+
+POST my-id-field-test-index/_bulk?pipeline=my-pipeline
+{ "index": {}}
+{ "fruit": "Whole new fruit" , "amount": 31}
+{ "index": {}}
+{ "fruit": "Never seen before fruit" , "amount": 67}
+```
 
 ## Example data
 
