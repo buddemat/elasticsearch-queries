@@ -60,9 +60,13 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
   }
 }
 ```
-## ID generation in ingestion pipelines
 
-...
+This approach can (slightly modified) also be used in ingestion pipelines, see below.
+
+## ID generation in ingestion pipelines
+ID generation while ingestion has the charm that it does not require an additional step. However, it limits the available approaches to what can be done with means available in elasticsearch queries.
+
+
 
 ## Example data
 
