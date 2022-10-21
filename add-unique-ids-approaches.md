@@ -40,6 +40,7 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
 ```
 #### Pros
 * the uniqueness of the generated `id` is *guaranteed* by Elasticsearch
+* internal `_id` and `id` in source are identical
 
 #### Cons
 * this approach can not work while initially indexing a document, since the internal `_id` field is only generated _at the very end_ of indexing and could be used in ingestion pipelines
