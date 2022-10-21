@@ -38,12 +38,18 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
   }
 }
 ```
-This approach does not work on indexing, since the internal `_id` field is only generated _at the very end_ of indexing and cannot be used in ingestion pipelines.
+#### Pros
+* the uniqueness of the generated `id` is *guaranteed* by Elasticsearch
+
+#### Cons
+* this approach can not work while initially indexing a document, since the internal `_id` field is only generated _at the very end_ of indexing and could be used in ingestion pipelines
+* since it can only be user in an `_reindex` or `_update_by_query` fashion, this is an extra step that is required to generate an `id` for existing documents
+
 
 ### Example using `script` query that generates id using `java.util.UUID.randomUUID()`
 
 This approach updates the `_source` with a new field built based on UUID generation. It adds a new `uuid` field in the source with a
-generated uuid.
+generated [version 4 (i.e. random type)](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) uuid.
 
 ```
 POST  my-id-field-test-index/_update_by_query?conflicts=proceed
@@ -63,14 +69,20 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
   }
 }
 ```
+#### Pros
+* the chance of collisions [is _statistically_ veryy low](https://stackoverflow.com/a/20999821/14015737), so the uniqueness of the generated `uuid` is _likely_
+* this approach can (slightly modified) also be used in ingestion pipelines, see below
 
-This approach can (slightly modified) also be used in ingestion pipelines, see below.
+#### Cons
+* uniqeness is not _guaranteed_, only _statistically_ likely
+* when used in an `_update_by_query` fashion, this is an extra step that is required to generate a `uuid` for existing documents
+
 
 ## ID generation in ingest pipelines
 ID generation while ingestion has the charm that it does not require an additional step. However, it limits the available approaches to what can be done with means available in elasticsearch queries.
 
 ### Example using a painless `script` that generates ids using `java.util.UUID.randomUUID()`
-The following approach defines a pipeline that uses a similar script as above to generate a `uuid` field and attach it to incoming documents.
+The following approach defines a pipeline that uses a similar script as above to generate a `uuid` field with a [version 4 (i.e. random type)](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) uuid and attach it to incoming documents.
 
 #### Simulate pipeline
 
@@ -81,7 +93,7 @@ POST _ingest/pipeline/_simulate
     "processors": [
       {
         "script": {
-          "description": "Generate UUID and store in 'uuid' field.",
+          "description": "Generate (version 4, i.e. random) UUID and store in 'uuid' field.",
           "lang": "painless",
           "source": """
             ctx['uuid'] = java.util.UUID.randomUUID().toString()
@@ -112,7 +124,7 @@ PUT _ingest/pipeline/my-pipeline
   "processors": [
       {
         "script": {
-          "description": "Generate UUID and store in 'uuid' field.",
+          "description": "Generate (version 4, i.e. random) UUID and store in 'uuid' field.",
           "lang": "painless",
           "source": """
             ctx['uuid'] = java.util.UUID.randomUUID().toString()
@@ -132,6 +144,13 @@ POST my-id-field-test-index/_bulk?pipeline=my-pipeline
 { "index": {}}
 { "fruit": "Never seen before fruit" , "amount": 67}
 ```
+#### Pros
+* the chance of collisions [is _statistically_ very low](https://stackoverflow.com/a/20999821/14015737), so the uniqueness of the generated `uuid` is *likely*
+* the `uuid` is generated on indexing, no extra step is required
+
+#### Cons
+* uniqeness is not _guaranteed_, only _statistically_ likely
+
 
 ## Example data
 
