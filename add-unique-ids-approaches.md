@@ -1,6 +1,6 @@
 # Ways to create unique ids in elasticsearch index
 
-I'm looking for ways to auto generate unique IDs in elasticsearch indices. There are different approaches possible, each with its own set of benefits or drawbacks.
+I'm looking for ways to auto-generate unique IDs in elasticsearch indices. There are different approaches possible, each with its own set of benefits and drawbacks.
 
 Possible characteristics:
 
