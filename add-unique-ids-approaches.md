@@ -21,7 +21,7 @@ The update approach always means that the id generation needs to be performed in
 
 This approach updates the `_source` with a new field built based on the auto-generated index field. It takes this `_id` and adds a new `id` field in the source with identical value (if it does not exist yet).
 ```
-POST  my-id-field-test-index/_update_by_query?conflicts=proceed&wait_for_completion=false
+POST  my-id-field-test-index/_update_by_query?conflicts=proceed&wait_for_completion=false&refresh=true
 {
   "script": {
     "source": "ctx._source.id = ctx._id",
