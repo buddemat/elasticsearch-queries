@@ -71,7 +71,7 @@ POST  my-id-field-test-index/_update_by_query?conflicts=proceed
 }
 ```
 #### Pros
-* the chance of collisions [is _statistically_ veryy low](https://stackoverflow.com/a/20999821/14015737), so the uniqueness of the generated `uuid` is _likely_
+* the chance of collisions [is _statistically_ very low](https://stackoverflow.com/a/20999821/14015737), so the uniqueness of the generated `uuid` is _likely_
 * this approach can (slightly modified) also be used in ingestion pipelines, see below
 
 #### Cons
