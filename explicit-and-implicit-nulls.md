@@ -39,6 +39,42 @@ GET my-null-index/_search
   }
 }
 ```
+A `wildcard` or `query_string` query with only an asterisk as search term has the same effect, as it should be handled as an `exists` query internally (TODO check if this is true for ES or only for Lucene directly...:
+
+```
+GET my-null-index/_search
+{
+  "query": {
+    "wildcard": {
+      "status_code": {
+        "value": "*"
+      }
+    }
+  }
+}
+```
+
+or
+
+```
+GET my-null-index/_search
+{
+  "query": {
+    "query_string": {
+      "fields": [
+        "status_code*"
+      ],
+      "query": "*"
+    }
+  }
+}
+```
+
+or inline:
+```
+GET my-null-index/_search?q=status_code:*
+```
+
 This will return record `3` from the example above.
 
 ## Explicit `null` values
