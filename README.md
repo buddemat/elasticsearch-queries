@@ -1,3 +1,18 @@
 # elasticsearch-queries
 
-Repo to store some useful Elasticsearch queries for future reference.
+This repo is a personal collection of Elasticsearch resources, which is for my personal use, e.g. to store some useful Elasticsearch queries for future reference.
+
+
+## Repository structure
+
+All files are Markdown files that collect resources to achieve certain things. The documents have been written by myself, their contents have either been created by me or partially collected from other places, e.g. Stackoverflow.
+
+```
+elasticsearch-queries
+├── add-unique-ids-approaches.md             # Ways to achieve a unique id field in Elasticsearch.
+├── alias-auto-update-on-index-creation.md   # How to auto-add aliases to indices based on index patterns.
+├── cluster-settings.md                      # Queries to modify cluster settings.
+├── count_fields_in_index.md                 # How to count fields in an ES index.
+├── explicit-and-implicit-nulls.md           # Short comparison of explicit and implicit NULL values.
+└── README.md                                # This file.
+```
