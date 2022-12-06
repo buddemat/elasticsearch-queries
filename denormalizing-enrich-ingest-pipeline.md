@@ -2,6 +2,31 @@
 
 ### Example
 
+
+
+<table>
+   <tr><th>Table <em>categories</em> </th><th>Table <em>items</em></th></tr>
+<tr><td>
+
+| id | category  |
+|----|-----------|
+| 1  | food      |
+| 2  | furniture |
+| 3  | movies    | 
+
+
+</td><td>   
+   
+| item                  | cat_id |
+|-----------------------|--------|
+| spaghetti             | 1      |
+| Die Hard              | 3      |
+| Bridget Jones' Diary  | 3      |
+| sofa                  | 2      |
+| kitchen table         | 2      |
+
+</td></tr> </table>   
+   
 1. Generate test data: create two indices, `items-source-index` and `categories-source-index`.
 
    ```
