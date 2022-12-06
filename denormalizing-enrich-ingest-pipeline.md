@@ -94,6 +94,7 @@
          "remove": {
            "field": "cat_id"
          }
+       }
      ]
    }
    ```
