@@ -29,7 +29,7 @@ GET my-id-subsampling-test-index/_search
 * works generally for every n-th record
 
 #### Cons
-* requires `id` field 
+* requires continuous numeric `id` field 
 * hardcoded modulus always returns the same subset
 * filters records, not hits: combined with a query may filter out results completely
 
