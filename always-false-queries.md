@@ -34,7 +34,25 @@ A boolean filter that requires the document to not have an `_id` field will be a
 }
 ```
 ## Overwriting the query with an URL query string 
-TODO
+
+An URL Lucene query string added with `?q=` overwrites the query in the body. An empty query string will always be false.
+
+```
+GET my-new-index/_search?q=
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": "Doe"
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 ## Setting `size: 0` 
 TODO
