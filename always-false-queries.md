@@ -35,7 +35,7 @@ A boolean filter that requires the document to not have an `_id` field will be a
 ```
 ## Overwriting the query with an URL query string 
 
-An URL Lucene query string added with `?q=` overwrites the query in the body. An empty query string will always be false.
+An URL Lucene query string added with `?q=` overwrites the query in the body. An empty query string will always return no hits.
 
 ```
 GET my-new-index/_search?q=
@@ -54,5 +54,47 @@ GET my-new-index/_search?q=
 }
 ```
 
+
+
 ## Setting `size: 0` 
-TODO
+
+Another option to at least get no hits displayed is setting the parameter `size: 0`.
+
+```
+GET my-new-index/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": "Klaus"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+When a size is already set and that should be preserved as part of the query, additionally specifying `size=0` as URL parameter overwrites the setting.
+
+```
+GET my-new-index/_search?size=0
+{
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": "Doe"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+
