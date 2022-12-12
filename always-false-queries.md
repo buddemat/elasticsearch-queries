@@ -3,6 +3,8 @@ In some applications users may not be permitted to see certain result sets bases
 
 In an SQL statement, one could e.g. append (or extend an existing) `WHERE` condition with `AND true = false`. In Elasticsearch there are different possibilites to achieve the same.
 
+Depending on the approach, either the query body or the URL can be modified. The latter leaves the query body untouched, which, depending on the circumstances, could be either beneficial or not. The modyfied URL might not be part of logged data which would require changing the underlying mechanism. On the other hand, the original query in the body is invalidated without it being altered in that case.
+
 ## Appending a `filter` with an always false condition
 
 A boolean filter that requires the document to not have an `_id` field will be always false, since this is an internal field that Elasticsearch generates at indexing time.
@@ -52,8 +54,7 @@ GET my-new-index/_search?q=
     }
   }
 }
-```
-
+```  
 
 
 ## Setting `size: 0` 
@@ -69,7 +70,7 @@ GET my-new-index/_search
       "must": [
         {
           "match": {
-            "name": "Klaus"
+            "name": "Doe"
           }
         }
       ]
@@ -77,6 +78,7 @@ GET my-new-index/_search
   }
 }
 ```
+
 When a size is already set and that should be preserved as part of the query, additionally specifying `size=0` as URL parameter overwrites the setting.
 
 ```
@@ -96,5 +98,3 @@ GET my-new-index/_search?size=0
   }
 }
 ```
-
-
