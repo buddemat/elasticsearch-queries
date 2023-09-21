@@ -15,6 +15,7 @@ elasticsearch-queries
 ├── cluster-settings.md                      # Queries to modify cluster settings.
 ├── count_fields_in_index.md                 # How to count fields in an ES index.
 ├── denormalizing-enrich-ingest-pipeline.md  # Denormalization example with enrichment.
+├── dumping-indices.md                       # Ingesting dumps into ES and dumping ES indices.
 ├── explicit-and-implicit-nulls.md           # Short comparison of explicit and implicit NULL values.
 ├── random-subsample-query.md                # How to produce subset of query result.
 └── README.md                                # This file.
