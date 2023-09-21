@@ -1,5 +1,9 @@
 # Dumping and restoring ES data
-Different ways of dumping and restoring data from/to an Elasticsearch cluster and their pros and cons.
+Different ways of dumping and/or restoring data from/to an Elasticsearch cluster and their pros and cons.
+
+| Tool      | Description | Advantages | Disadvantages              |
+|-----------|-------------|------------|------------------------------|
+| filebeats |...          | <ul><li>simple</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li></ul>  |
 
 
 ## Filebeats
