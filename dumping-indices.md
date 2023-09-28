@@ -3,8 +3,8 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
-| filebeat  |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 | logstash  |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| filebeat  |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## Logstash
@@ -34,7 +34,7 @@ output {
     stdout { codec => rubydebug }                                    
 }                                                                    
 ```
-:bangbang: As codec in the 'logstash.conf', `json` must be used rather than `json_lines`. The latter is for _streamed_ JSON that is newline delimited, _not_ for files:
+:bangbang: As codec in the `logstash.conf`, `json` must be used rather than `json_lines`. The latter is for _streamed_ JSON that is newline delimited, _not_ for files.
 
 
 To execute, run a docker container with the configuration above
