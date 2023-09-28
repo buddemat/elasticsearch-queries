@@ -3,7 +3,7 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
-| filebeats |...          | <ul><li>(relatively) simple</li><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| logstash  |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## Filebeat
@@ -138,7 +138,23 @@ setup:
          data_stream: false
    ```
    The `data_stream` option only exists from version 8.x on. 
-   The index template file must contain an `index_pattern` definition. :bangbang: TODO: include working example.
+   The index template file must contain an `index_pattern` definition:
+   ```
+   {
+     "index_patterns": ["test_*"],
+       "mappings" : {
+         "properties" : {
+           "name" : {
+             "type" : "text"
+           },
+           "weirddate" : {
+             "type" : "date",
+             "format" : "yyyy.MM.dd"
+           }
+         }
+       }
+   }
+   ```
    Finally, the index template file must of course also be copied or mounted into the docker container when running Filebeat.
 
    ```
