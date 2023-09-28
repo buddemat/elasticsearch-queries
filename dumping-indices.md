@@ -3,12 +3,12 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
-| filebeats |...          | <ul><li>simple</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li></ul>  |
+| filebeats |...          | <ul><li>(relatively) simple</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>adds additional fields (e.g. `@timestamp`</li></ul>  |
 
 
 ## Filebeat
 
-Restoring a file based dump can easily be done using `filebeat`. If the documents are stored as newline-delimited JSON, the following `filebeat.yml` will configre filebeat to parse those files according to the input pattern and store all documents in a single index:
+Restoring a file based dump can (relatively) easily be done using `filebeat`. If the documents are stored as newline-delimited JSON, the following `filebeat.yml` will configre filebeat to parse those files according to the input pattern and store all documents in a single index:
 
 ```
 filebeat.inputs:
@@ -20,15 +20,10 @@ filebeat.inputs:
       overwrite_keys: true 
       expand_keys: true
 
-processors:
-  - rename:
-      fields:
-        - from: "source"
-          to: "orig_source"
-        - from: "client"
-          to: "orig_client"
-      ignore_missing: true
-      fail_on_error: true
+```
+processors:                                             
+  - drop_fields:                                        
+      fields: ["input", "agent", "ecs", "host", "log"]  
 
 output.elasticsearch:
   hosts: https://localhost:9200
@@ -37,6 +32,7 @@ output.elasticsearch:
   bulk_max_size: 0
   compression_level: 9
 ```
+Since Filebeat adds custom fields, we drop those. The `@timestamp` field cannot be dropped.
 
 In order to use this configuration in the docker container, we need to adjust the file's permissions as follows, otherwise an error will occur (`Exiting: error loading config file: config file ("filebeat.yml") can only be writable by the owner but the permissions are "-rw-rw-r--"`):
 ```
@@ -53,26 +49,124 @@ docker  run --rm --name filebeat -v $PWD/source_folder:/input -v $PWD/filebeat.y
 filebeat-7.17.3-2023.09.21-000001
 ``` 
 
+### Use custom target index name
 To supply a custom index name, three additional steps are required:
 
 1. The target index name or pattern needs to be added under `output.elasticsearch.index` and 
 2. The options `setup.template.name` and `setup.template.pattern` have to be set if the index name is modified
 3. ILM needs to be disabled or, alternatively `setup.ilm.policy_name` and `setup.ilm.rollover_alias` need to be set. Since for the simple case of importing a dump, ILM is probably not needed, the former will do.
 
-Overall the yaml needs the following additional entries:
+Overall the yaml needs the following additional/changed entries:
 ```
 output:
   elasticsearch:
     index: "your-index-%{[agent.version]}-%{+yyyy.MM.dd}"
 setup:
+  ilm: 
+    enabled: false
   template:
     name: 'your-index'
     pattern: 'your-index-*'
     enabled: false
-  ilm: 
-    enabled: false
 ```
 
-:bangbang: The above config will make Elasticsearch 'guess' the mapping. To provide a mapping to filebeat, `setup.template.fields` can be set to point to a YAML file containing the fields.
+### Use custom mapping
+:bangbang: The above config will make Elasticsearch 'guess' the mapping. To provide a mapping to filebeat, there are different options. 
 
-For a reference of what should be in `your-index-fields.yml`, take a look at the `fields.yml` that comes installed in `/etc/filebeat/fields.yml` (from: https://discuss.elastic.co/t/filebeat-to-elasticsearch-configuration-mapping/271031).
+1. One straight-forward option is to create the empty index with the desired mapping beforehand, e.g. via `curl` or the Kibana Dev Console. This would be a separate step though that needs to be done independently from filebeat.
+
+1. Alternatively, `setup.template.append_fields` can be used to specify fields that should be overwritten. Change `setupt.template.enabled` to `true`:
+   ```
+   setup:
+     template:
+       enabled: true
+       overwrite: true
+       append_fields:
+       - name: 'fieldname'
+         type: keyword
+   ```
+   
+   However, this has some limitations. It uses the standard dynamic template for all non-specified fields (i.e. mapping all strings to `keyword`) and does not support special mapping options, such as non-standard date formats for date type fields (although the [documentation auggests this should be possible](https://www.elastic.co/guide/en/beats/devguide/7.17/event-fields-yml.html). Also, since date detection is disabled for the standard template, all date fields must be explitly set, or they become `keyword` type fields as well.
+
+
+1. `setup.template.fields` can be set to point to a YAML file containing the fields.
+
+   ```
+   setup:
+     template:
+    overwrite: true                                
+    fields: "/usr/share/filebeat/custom_fields.yml"  
+   ```
+
+   The `custom_fields.yml` should contain the field definitions:
+
+   ```
+   - key: test                   
+     title: test                 
+     description: >              
+       Custom fields.            
+     fields:                     
+       - name: 'name'       
+         type: text         
+         multi_fields:      
+           - name: keyword  
+             type: keyword  
+       - name: 'email'      
+         type: keyword      
+       - name: 'birthday'   
+         type: date         
+~                             
+
+   ```
+                              
+   The limitations are similar to above, except the standard fields are not automatically part of the mapping (since a custom `fields.yml` is used). But again, date detection is disabled by default, so you need to explicitly list all fields, and again, non-standard date formats cannot be specified as part of the mapping. See below for a workaround.                           
+
+   For a reference of what should be in `custom_fields.yml`, take a look at the `fields.yml` that comes installed in `/etc/filebeat/fields.yml` (from: https://discuss.elastic.co/t/filebeat-to-elasticsearch-configuration-mapping/271031).
+
+   The `custom_fields.yml` must also be mounted into the docker container:
+
+   ```
+   docker run --rm --name filebeat2 -v $PWD:/input -v $PWD/filebeat.yml:/usr/share/filebeat/filebeat.yml -v $PWD/custom_fields.yml:/usr/share/filebeat/custom_fields.yml docker.elastic.co/beats/filebeat:7.17.3
+   ```
+
+1. `setup.template.json` options can be set and the mapping can be provided through an Elasticsearch index template file.
+
+   ```
+   setup:
+     template:
+       json:
+         enabled: true
+         path: "template.json"
+         name: "template-name"
+         data_stream: false
+   ```
+   The `data_stream` option only exists from version 8.x on. 
+   The index template file must contain an `index_pattern` definition. :bangbang: TODO: include working example.
+   Finally, the index template file must of course also be copied or mounted into the docker container when running Filebeat.
+
+   ```
+   docker run --rm --name filebeat2 -v $PWD:/input -v $PWD/filebeat.yml:/usr/share/filebeat/filebeat.yml -v $PWD/template.json:/usr/share/filebeat/template.json docker.elastic.c o/beats/filebeat:7.17.3
+   ```
+
+### Process fields
+Using processors is a way to transform or filter data during ingestion with Filebeat. 
+It is also an option to accomodate special date formats instead of adding an according format to the mapping, simply parsing them into correct dates through Filebeat.
+Since date parsing in Filebeat is very convoluted at best, you need to add a `timestamp` processor and parse the date while the event flows through Filebeat (see [documentation](https://www.elastic.co/guide/en/beats/filebeat/7.17/processor-timestamp.html):
+```
+processors:                                             
+  - timestamp:                                          
+      field: weirddate                                  
+      target_field: weirddate_conv                      
+      layouts:                                          
+        - '2006.01.02'                                  
+      test:                                             
+        - '2019.06.22'                                  
+        - '2019.11.18'                                  
+        - '2020.08.03'                                  
+  - drop_fields:                                        
+      fields: [weirddate]                               
+  - rename:                                             
+      fields:                                           
+        - from: "weirddate_conv"                        
+          to: "weirddate"                               
+```
