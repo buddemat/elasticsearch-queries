@@ -3,8 +3,8 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
+| filebeat  |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 | logstash  |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
-| filebeat  |...          | <ul><li>(relatively) simple</li><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## Logstash
@@ -42,7 +42,7 @@ To execute, run a docker container with the configuration above
 docker run --rm --name logstash -v $PWD:/input -v $PWD/logstash.conf:/usr/share/logstash/pipeline/logstash.conf docker.elastic.co/logstash/logstash:7.17.3
 ```
 
-## Remove extra fields
+#### Remove extra fields
 
 Similar to Filebeat, Logstash adds extra fields to the ingested documents. To remove those, add a `mutate` filter:
 
@@ -66,7 +66,7 @@ filter {
 ```
 
 
-## Use custom mapping
+#### Use custom mapping
 
 To suppy a custom mapping to logstash, an index template can be created:
 
@@ -141,7 +141,7 @@ docker  run --rm --name filebeat -v $PWD/source_folder:/input -v $PWD/filebeat.y
 filebeat-7.17.3-2023.09.21-000001
 ``` 
 
-### Use custom target index name
+#### Use custom target index name
 To supply a custom index name, three additional steps are required:
 
 1. The target index name or pattern needs to be added under `output.elasticsearch.index` and 
@@ -162,7 +162,7 @@ setup:
     enabled: false
 ```
 
-### Use custom mapping
+#### Use custom mapping
 :bangbang: The above config will make Elasticsearch 'guess' the mapping. To provide a mapping to filebeat, there are different options. 
 
 1. One straight-forward option is to create the empty index with the desired mapping beforehand, e.g. via `curl` or the Kibana Dev Console. This would be a separate step though that needs to be done independently from filebeat.
@@ -255,7 +255,7 @@ setup:
    docker run --rm --name filebeat2 -v $PWD:/input -v $PWD/filebeat.yml:/usr/share/filebeat/filebeat.yml -v $PWD/template.json:/usr/share/filebeat/template.json docker.elastic.c o/beats/filebeat:7.17.3
    ```
 
-### Process fields
+#### Process fields
 Using processors is a way to transform or filter data during ingestion with Filebeat. 
 It is also an option to accomodate special date formats instead of adding an according format to the mapping, simply parsing them into correct dates through Filebeat.
 Since date parsing in Filebeat is very convoluted at best, you need to add a `timestamp` processor and parse the date while the event flows through Filebeat (see [documentation](https://www.elastic.co/guide/en/beats/filebeat/7.17/processor-timestamp.html):
