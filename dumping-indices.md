@@ -20,7 +20,6 @@ filebeat.inputs:
       overwrite_keys: true 
       expand_keys: true
 
-```
 processors:                                             
   - drop_fields:                                        
       fields: ["input", "agent", "ecs", "host", "log"]  
@@ -115,8 +114,6 @@ setup:
          type: keyword      
        - name: 'birthday'   
          type: date         
-~                             
-
    ```
                               
    The limitations are similar to above, except the standard fields are not automatically part of the mapping (since a custom `fields.yml` is used). But again, date detection is disabled by default, so you need to explicitly list all fields, and again, non-standard date formats cannot be specified as part of the mapping. See below for a workaround.                           
