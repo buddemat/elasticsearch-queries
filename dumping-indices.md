@@ -4,7 +4,100 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
 | logstash  |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| filebeat  |...          | <ul><li>(relatively) simple</li><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
+
+## Logstash
+
+Ingesting using logstash is controlled via `logstash.conf`:
+
+```
+input {                                       
+    file {                                    
+        codec => json                         
+        path => ["/input/test_data.json"]     
+        sincedb_path => [ "/dev/null" ]       
+        start_position => "beginning"         
+        max_open_files => 1                   
+        close_older => "5 sec"                
+    }                                         
+}                                             
+output {                                                             
+    elasticsearch {                                                  
+        hosts => ["https://localhost:9200"]
+        ssl => true                                                  
+        ssl_certificate_verification => false                        
+        user => "elastic"                                            
+        password => "password"                               
+        index => "test_logstash"                                      
+    }                                                                
+    stdout { codec => rubydebug }                                    
+}                                                                    
+```
+:bangbang: As codec in the 'logstash.conf', `json` must be used rather than `json_lines`. The latter is for _streamed_ JSON that is newline delimited, _not_ for files:
+
+
+To execute, run a docker container with the configuration above
+```
+docker run --rm --name logstash -v $PWD:/input -v $PWD/logstash.conf:/usr/share/logstash/pipeline/logstash.conf docker.elastic.co/logstash/logstash:7.17.3
+```
+
+## Remove extra fields
+
+Similar to Filebeat, Logstash adds extra fields to the ingested documents. To remove those, add a `mutate` filter:
+
+```
+filter {                                                                        
+    mutate {                                                                    
+        remove_field => [ "host", "path", "@version", "@timestamp" ]            
+    }                                                                           
+}                                                                               
+```
+
+The same can be achieved with a `prune` filter, whitelisting the fields to keep instead of specifying those to drop.
+
+```
+filter {                                                                       
+    prune {                                                                    
+        interpolate => true                                                    
+        whitelist_names => ["fieldtokeep1","fieldtokeep2"]
+    }                                                                          
+}                                                                              
+```
+
+
+## Use custom mapping
+
+To suppy a custom mapping to logstash, an index template can be created:
+
+```
+        template => "/mapping/mapping.json"   
+        template_name => "test"               
+        template_overwrite => true            
+```
+
+The index template file `mapping.json` must contain an `index_patterns` definition that matches the index name:
+```
+{
+  "index_patterns": ["test_logstash"],
+    "mappings" : {
+      "properties" : {
+        "name" : {
+          "type" : "text"
+        },
+        "weirddate" : {
+          "type" : "date",
+          "format" : "yyyy.MM.dd"
+        }
+      }
+    }
+}
+```
+
+The mapping file also needs to be mounted into the docker container of course:
+```
+docker run --rm --name logstash -v $PWD:/input -v $PWD/logstash.conf:/usr/share/logstash/pipeline/logstash.conf -v /$PWD/mapping.json:/mapping/mapping.json docker.elastic.co/logstash/logstash:7.17.3
+```
 
 ## Filebeat
 
@@ -138,6 +231,7 @@ setup:
          data_stream: false
    ```
    The `data_stream` option only exists from version 8.x on. 
+
    The index template file must contain an `index_pattern` definition:
    ```
    {
