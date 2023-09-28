@@ -3,7 +3,7 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool      | Description | Advantages | Disadvantages              |
 |-----------|-------------|------------|------------------------------|
-| filebeats |...          | <ul><li>(relatively) simple</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>adds additional fields (e.g. `@timestamp`</li></ul>  |
+| filebeats |...          | <ul><li>(relatively) simple</li><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## Filebeat
