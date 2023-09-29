@@ -53,8 +53,9 @@ filter {
     }                                                                           
 }                                                                               
 ```
+:bangbang: if your source data contains one of these fields, you should _not_ drop it.
 
-The same can be achieved with a `prune` filter, whitelisting the fields to keep instead of specifying those to drop.
+The same can be achieved with a `prune` filter, whitelisting the fields to keep instead of specifying those to drop. This may become infeasible when the documents have a lot of fields.
 
 ```
 filter {                                                                       
@@ -125,6 +126,7 @@ output.elasticsearch:
   compression_level: 9
 ```
 Since Filebeat adds custom fields, we drop those. The `@timestamp` field cannot be dropped.
+:bangbang: if your source data contains one of these fields, you should _not_ drop it, as filebeat will not overwrite existing fields.
 
 In order to use this configuration in the docker container, we need to adjust the file's permissions as follows, otherwise an error will occur (`Exiting: error loading config file: config file ("filebeat.yml") can only be writable by the owner but the permissions are "-rw-rw-r--"`):
 ```
