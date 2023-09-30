@@ -21,15 +21,13 @@ npm install elasticdump -g
 Then, dumping and restoring is a matter of one command: 
 
 ```
-elasticdump --input=/etc/mydata.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=data --limit=25
---concurrencyInterval=2000
+elasticdump --input=/etc/mydata.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=data --limit=25 --concurrencyInterval=2000
 ``` 
 
 In case a custom mapping should be used, dump/restore the mapping with a separatae command first:
 
 ```
-elasticdump --input=/etc/mymapping.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=mapping --limit=25
---concurrencyInterval=2000
+elasticdump --input=/etc/mymapping.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=mapping
 ``` 
 
 
