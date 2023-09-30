@@ -8,6 +8,31 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 | filebeat     |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
+## elasticdump
+
+Dumping and restoring with `elasticdump` is pretty straightforward. 
+
+The tool can be installed via `npm`:
+```
+apt-get install -y nodejs npm
+npm install elasticdump -g
+```
+
+Then, dumping and restoring is a matter of one command: 
+
+```
+elasticdump --input=/etc/mydata.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=data --limit=25
+--concurrencyInterval=2000
+``` 
+
+In case a custom mapping should be used, dump/restore the mapping with a separatae command first:
+
+```
+elasticdump --input=/etc/mymapping.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=mapping --limit=25
+--concurrencyInterval=2000
+``` 
+
+
 ## Logstash
 
 Ingesting using logstash is controlled via `logstash.conf`:
