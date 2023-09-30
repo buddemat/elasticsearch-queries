@@ -3,9 +3,9 @@ Different ways of dumping and/or restoring data from/to an Elasticsearch cluster
 
 | Tool         | Description | Advantages | Disadvantages              |
 |--------------|-------------|------------|------------------------------|
-| elasticdump  |Command line tool, Open Source<br>https://github.com/elasticsearch-dump/elasticsearch-dump | <ul><li>simple / low-code</li><li>can also dump `mapping` and `analyzer`</li><li>also allows direct "dumping" from one ES cluster into another</li><li>install via npm</li><li>also supports OpenSearch</li><li>Can also be used to easily construct docker images with data in them, e.g. vor test / QA deployments.</li></ul>  | <ul><li>requires the dump to have been created with `elasticdump` in the first place</li></ul>  |
-| logstash     |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
-| filebeat     |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| elasticdump  |Command line tool, Open Source<br>https://github.com/elasticsearch-dump/elasticsearch-dump | <ul><li>simple / low-code</li><li>can also dump `mapping` and `analyzer`</li><li>also allows direct "dumping" from one ES cluster into another</li><li>install via npm</li><li>also supports OpenSearch</li><li>can also be used to easily construct docker images with data in them, e.g. vor test / QA deployments.</li></ul>  | <ul><li>requires the dump to have been created with `elasticdump` in the first place</li></ul>  |
+| logstash     |...          | <ul><li>processing and transformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| filebeat     |...          | <ul><li>processing and transformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## elasticdump
@@ -24,7 +24,7 @@ Then, dumping and restoring is a matter of one command:
 elasticdump --input=/etc/mydata.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=data --limit=25 --concurrencyInterval=2000
 ``` 
 
-In case a custom mapping should be used, dump/restore the mapping with a separatae command first:
+In case a custom mapping should be used, dump/restore the mapping with a separate command first:
 
 ```
 elasticdump --input=/etc/mymapping.json --output=http://"$ELASTICSEARCH_USERNAME":"$ELASTIC_PASSWORD"@localhost:9200/myindexname --type=mapping
@@ -33,7 +33,7 @@ elasticdump --input=/etc/mymapping.json --output=http://"$ELASTICSEARCH_USERNAME
 
 ## Logstash
 
-Ingesting using logstash is controlled via `logstash.conf`:
+Ingesting using Logstash is controlled via `logstash.conf`:
 
 ```
 input {                                       
@@ -93,7 +93,7 @@ filter {
 
 #### Use custom mapping
 
-To suppy a custom mapping to logstash, an index template can be created:
+To suppy a custom mapping to Logstash, an index template can be created:
 
 ```
         template => "/mapping/mapping.json"   
@@ -126,7 +126,7 @@ docker run --rm --name logstash -v $PWD:/input -v $PWD/logstash.conf:/usr/share/
 
 ## Filebeat
 
-Restoring a file based dump can (relatively) easily be done using `filebeat`. If the documents are stored as newline-delimited JSON, the following `filebeat.yml` will configre filebeat to parse those files according to the input pattern and store all documents in a single index:
+Restoring a file based dump can (relatively) easily be done using `filebeat`. If the documents are stored as newline-delimited JSON, the following `filebeat.yml` will configure filebeat to parse those files according to the input pattern and store all documents in a single index:
 
 ```
 filebeat.inputs:
@@ -150,7 +150,7 @@ output.elasticsearch:
   compression_level: 9
 ```
 Since Filebeat adds custom fields, we drop those. The `@timestamp` field cannot be dropped.
-:bangbang: if your source data contains one of these fields, you should _not_ drop it, as filebeat will not overwrite existing fields.
+:bangbang: if your source data contains one of these fields, you should _not_ drop it, as Filebeat will not overwrite existing fields.
 
 In order to use this configuration in the docker container, we need to adjust the file's permissions as follows, otherwise an error will occur (`Exiting: error loading config file: config file ("filebeat.yml") can only be writable by the owner but the permissions are "-rw-rw-r--"`):
 ```
@@ -162,7 +162,7 @@ This configuration can then either be executed by building an according Docker i
 ```
 docker  run --rm --name filebeat -v $PWD/source_folder:/input -v $PWD/filebeat.yml:/usr/share/filebeat/filebeat.yml docker.elastic.co/beats/filebeat:7.17.3
 ```
-:bangbang: The above 'filebeat.yml' will result in the data being stored according to the default index naming pattern, e.g. 
+:bangbang: The above `filebeat.yml` will result in the data being stored according to the default index naming pattern, e.g. 
 ``` 
 filebeat-7.17.3-2023.09.21-000001
 ``` 
@@ -174,7 +174,7 @@ To supply a custom index name, three additional steps are required:
 2. The options `setup.template.name` and `setup.template.pattern` have to be set if the index name is modified
 3. ILM needs to be disabled or, alternatively `setup.ilm.policy_name` and `setup.ilm.rollover_alias` need to be set. Since for the simple case of importing a dump, ILM is probably not needed, the former will do.
 
-Overall the yaml needs the following additional/changed entries:
+Overall the YAML needs the following additional/changed entries:
 ```
 output:
   elasticsearch:
@@ -189,9 +189,9 @@ setup:
 ```
 
 #### Use custom mapping
-:bangbang: The above config will make Elasticsearch 'guess' the mapping. To provide a mapping to filebeat, there are different options. 
+:bangbang: The above config will make Elasticsearch 'guess' the mapping. To provide a mapping to Filebeat, there are different options. 
 
-1. One straight-forward option is to create the empty index with the desired mapping beforehand, e.g. via `curl` or the Kibana Dev Console. This would be a separate step though that needs to be done independently from filebeat.
+1. One straight-forward option is to create the empty index with the desired mapping beforehand, e.g. via `curl` or the Kibana Dev Console. This would be a separate step though that needs to be done independently from Filebeat.
 
 1. Alternatively, `setup.template.append_fields` can be used to specify fields that should be overwritten. Change `setupt.template.enabled` to `true`:
    ```
@@ -204,7 +204,7 @@ setup:
          type: keyword
    ```
    
-   However, this has some limitations. It uses the standard dynamic template for all non-specified fields (i.e. mapping all strings to `keyword`) and does not support special mapping options, such as non-standard date formats for date type fields (although the [documentation auggests this should be possible](https://www.elastic.co/guide/en/beats/devguide/7.17/event-fields-yml.html). Also, since date detection is disabled for the standard template, all date fields must be explitly set, or they become `keyword` type fields as well.
+   However, this has some limitations. It uses the standard dynamic template for all non-specified fields (i.e. mapping all strings to `keyword`) and does not support special mapping options, such as non-standard date formats for date type fields (although the [documentation suggests this should be possible](https://www.elastic.co/guide/en/beats/devguide/7.17/event-fields-yml.html). Also, since date detection is disabled for the standard template, all date fields must be explicitly set, or they become `keyword` type fields as well.
 
 
 1. `setup.template.fields` can be set to point to a YAML file containing the fields.
