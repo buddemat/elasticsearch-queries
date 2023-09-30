@@ -1,10 +1,11 @@
 # Dumping and restoring ES data
 Different ways of dumping and/or restoring data from/to an Elasticsearch cluster and their pros and cons.
 
-| Tool      | Description | Advantages | Disadvantages              |
-|-----------|-------------|------------|------------------------------|
-| logstash  |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
-| filebeat  |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| Tool         | Description | Advantages | Disadvantages              |
+|--------------|-------------|------------|------------------------------|
+| elasticdump  |Command line tool, Open Source<br>https://github.com/elasticsearch-dump/elasticsearch-dump | <ul><li>simple / low-code</li><li>can also dump `mapping` and `analyzer`</li><li>also allows direct "dumping" from one ES cluster into another</li><li>install via npm</li><li>also supports OpenSearch</li><li>Can also be used to easily construct docker images with data in them, e.g. vor test / QA deployments.</li></ul>  | <ul><li>requires the dump to have been created with `elasticdump` in the first place</li></ul>  |
+| logstash     |...          | <ul><li>processing and tranformation possible</li><li>supports sources and destinations other than files and Elasticsearch, e.g. RDBMs</li></ul>   | <ul><li>requires `docker` image</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
+| filebeat     |...          | <ul><li>processing and tranformation possible</li></ul>   | <ul><li>no dumping, only restoring</li><li>requires `docker` image</li><li>custom/complex mapping not straightforward to integrate</li><li>may add additional fields (e.g. `@timestamp`)</li><li>Designed for log ingestion / continuous ETL, so does not terminate when finished</li></ul>  |
 
 
 ## Logstash
