@@ -18,5 +18,6 @@ elasticsearch-queries
 ├── dumping-indices.md                       # Ingesting dumps into ES and dumping ES indices.
 ├── explicit-and-implicit-nulls.md           # Short comparison of explicit and implicit NULL values.
 ├── random-subsample-query.md                # How to produce subset of query result.
+├── retrieve-fields-which-were-hit.md        # Get a list of fields that contain a match for each hit.
 └── README.md                                # This file.
 ```
