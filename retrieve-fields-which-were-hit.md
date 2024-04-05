@@ -19,7 +19,7 @@ This index contains three documents, which have the search term `black` in diffe
 
 ## Approach using `explain` API
 
-Using the parameter `?explain=true`, one can get an `_explanation` section as part of the response, which will contain details on how the score was calculated. From that, one could in theory parse the fields that were hit. This seems quite convoluted and error prone, though.
+Using the parameter `?explain=true`, one can get an `_explanation` section as part of the response, which will contain details on how the score was calculated. From that, one could in theory parse the fields that were hit. 
 
 ```
 GET my_test_index/_search?explain=true
@@ -34,6 +34,16 @@ GET my_test_index/_search?explain=true
   }
 }
 ```
+
+The response to this consists of a detailed description of the components of each of the documents' scores, among them a `description` line that, for each field that contains a search hit, looks something like
+```
+              "description" : "weight(color:black in 0) [PerFieldSimilarity], result of:",
+```
+From this, the field names could be extracted, e.g. using an appropriate regex with a capture group such as 
+```
+\s*\"description\" : "weight\((.*?):\S* in [0-9]+\) \[PerFieldSimilarity], result of:\",
+```
+This approach seems quite convoluted and potentially error prone, though.
 
 ## Approach using `highlight`
 
