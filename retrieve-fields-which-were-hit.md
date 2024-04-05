@@ -40,9 +40,11 @@ The response to this consists of a detailed description of the components of eac
 ```
 From this, the field names could be extracted, e.g. using an appropriate regex with a capture group such as 
 ```regex
-\s*\"description\" : "weight\((.*?):\S* in [0-9]+\) \[PerFieldSimilarity], result of:\",
+\s*\"description\" : "weight\((\S+?):\S* in [0-9]+\) \[PerFieldSimilarity],.*
 ```
-This approach seems quite convoluted and potentially error prone, though.
+Since the search term should be known, the `\S*` part could also be substituted by the search term, at least if it is only a simple phrase. In case a more complex search term is used, such as `"(black OR blu~)"`, inserting the search term into the regex will not work. 
+
+Overall, this approach seems quite convoluted and potentially error prone, though.
 
 ## Approach using `highlight`
 
