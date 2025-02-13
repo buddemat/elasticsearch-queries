@@ -10,6 +10,7 @@ All files are Markdown files that collect resources to achieve certain things. T
 ```
 elasticsearch-queries
 ├── add-unique-ids-approaches.md             # Ways to achieve a unique id field in Elasticsearch.
+├── add-users-and-roles.md                   # Ways to add users/roles in Opensearch.
 ├── alias-auto-update-on-index-creation.md   # How to auto-add aliases to indices based on index patterns.
 ├── always-false-queries.md                  # How to invalidate queries with always false conditions.
 ├── cluster-settings.md                      # Queries to modify cluster settings.
