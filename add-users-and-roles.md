@@ -12,41 +12,41 @@ Add a read-only OpenSearch user with
 
 1. First add a new role
 
-```
-PUT _plugins/_security/api/roles/USER_RO
-{
-  "cluster_permissions": [
-  ],
-  "index_permissions": [{
-    "index_patterns": [
-      "test-read*"
-    ],
-    "dls": "",
-    "fls": [],
-    "masked_fields": [],
-    "allowed_actions": [
-      "read",
-      "indices:admin/get"
-    ]
-  }],
-  "tenant_permissions": [{
-    "tenant_patterns": [
-    ],
-    "allowed_actions": [
-    ]
-  }]
-}
-```
+    ```
+    PUT _plugins/_security/api/roles/USER_RO
+    {
+      "cluster_permissions": [
+      ],
+      "index_permissions": [{
+        "index_patterns": [
+          "test-read*"
+        ],
+        "dls": "",
+        "fls": [],
+        "masked_fields": [],
+        "allowed_actions": [
+          "read",
+          "indices:admin/get"
+        ]
+      }],
+      "tenant_permissions": [{
+        "tenant_patterns": [
+        ],
+        "allowed_actions": [
+        ]
+      }]
+    }
+    ```
 
 1. Then add a new user and assign the created role
 
-``` 
-PUT _plugins/_security/api/internalusers/USER_RO
-{
-  "password": "whatever",
-  "opendistro_security_roles": ["USER_RO"],
-  "backend_roles": ["USER_RO"],
-  "attributes": {
-  }
-}
-``` 
+    ``` 
+    PUT _plugins/_security/api/internalusers/USER_RO
+    {
+      "password": "whatever",
+      "opendistro_security_roles": ["USER_RO"],
+      "backend_roles": ["USER_RO"],
+      "attributes": {
+      }
+    }
+    ``` 
