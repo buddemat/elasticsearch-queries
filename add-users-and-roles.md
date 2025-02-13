@@ -13,7 +13,7 @@ Add a read-only OpenSearch user with
 1. First add a new role
 
     ```
-    PUT _plugins/_security/api/roles/USER_RO
+    PUT _plugins/_security/api/roles/ROLE_RO
     {
       "cluster_permissions": [
       ],
@@ -44,8 +44,8 @@ Add a read-only OpenSearch user with
     PUT _plugins/_security/api/internalusers/USER_RO
     {
       "password": "whatever",
-      "opendistro_security_roles": ["USER_RO"],
-      "backend_roles": ["USER_RO"],
+      "opendistro_security_roles": ["ROLE_RO"],
+      "backend_roles": ["ROLE_RO"],
       "attributes": {
       }
     }
