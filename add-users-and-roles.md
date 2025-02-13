@@ -10,6 +10,8 @@ TODO
 Add a read-only OpenSearch user with 
 * only data `read` and `indices:admin/get` permissions on the index pattern `test-read*` 
 
+1. First add a new role
+
 ```
 PUT _plugins/_security/api/roles/USER_RO
 {
@@ -35,6 +37,8 @@ PUT _plugins/_security/api/roles/USER_RO
   }]
 }
 ```
+
+1. Then add a new user and assign the created role
 
 ``` 
 PUT _plugins/_security/api/internalusers/USER_RO
