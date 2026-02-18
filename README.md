@@ -18,6 +18,7 @@ elasticsearch-queries
 ├── denormalizing-enrich-ingest-pipeline.md  # Denormalization example with enrichment.
 ├── dumping-indices.md                       # Ingesting dumps into ES and dumping ES indices.
 ├── explicit-and-implicit-nulls.md           # Short comparison of explicit and implicit NULL values.
+├── partial-results-alias-sort.md            # Discusses circumstances where ES may yield partial results.
 ├── random-subsample-query.md                # How to produce subset of query result.
 ├── retrieve-fields-which-were-hit.md        # Get a list of fields that contain a match for each hit.
 └── README.md                                # This file.
