@@ -9,6 +9,8 @@ TODO
 
 Add a read-only OpenSearch user with 
 * only data `read` and `indices:admin/get` permissions on the index pattern `test-read*` 
+* only data `read`, `indices:admin/get`, and `indices:monitor/settings/get` permissions on the index pattern `other-test-read*` 
+* only data `read` permissions on the index pattern `further-test-read*` 
 
 1. First add a new role
 
@@ -28,7 +30,30 @@ Add a read-only OpenSearch user with
           "read",
           "indices:admin/get"
         ]
-      }],
+      },{
+        "index_patterns": [
+          "other-test-read*"
+        ],
+        "dls": "",
+        "fls": [],
+        "masked_fields": [],
+        "allowed_actions": [
+          "read",
+          "indices:admin/get",
+          "indices:monitor/settings/get"
+        ]
+      },{
+        "index_patterns": [
+          "further-test-read*"
+        ],
+        "dls": "",
+        "fls": [],
+        "masked_fields": [],
+        "allowed_actions": [
+          "read"
+        ]
+      }
+      ],
       "tenant_permissions": [{
         "tenant_patterns": [
         ],
