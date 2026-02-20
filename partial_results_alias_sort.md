@@ -92,6 +92,7 @@ GET my-test-indices/_search
 Adding a `sort` statement on one of the exclusive fields to the above `_search` query on the alias will lead to a shard failure and the result will only return documents from the index that has the exclusive field. 
 The result does show a failed shard and the info ` "reason" : { "type" : "query_shard_exception", "reason" : "No mapping found for [instrument.keyword] in order to sort on", ... }`. 
 However, it still returns partial results, so if the "response health" is not checked, this may happen unnoticed.
+The only circumstance such a query returns a definite error response is if _all_ shards fail.
 
 ```json
 # query alias with sort -> shard failures, returns only docs from index 2 (hits: 3)
@@ -223,3 +224,4 @@ GET my-test-indices/_search
   ]
 }
 ```
+
